@@ -1,0 +1,43 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 28
+    defaultConfig {
+        applicationId "com.george.mylame"
+        minSdkVersion 15
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        ndk{
+//            moduleName "picdetect-jni" //lib的名称，对应LOCAL_MODULE
+//            ldLibs "log", "z", "m"  //链接时使用到的库，对应LOCAL_LDLIBS *注意ldLibs "log"一行，由于在test.c中#include "android/log.h"，所以必须把log.h包含进来。
+            abiFilters "arm64-v8a"/*,"armeabi"*/,"armeabi-v7a"/*,*"mips","mips64"*/,"x86","x86_64"//"x86_64"//"arm64-v8a"//"x86"//指定某种架构的CPU的so文件//"arm64-v8a","armeabi-v7a",
+//            //cFlags 编译gcc的flag，对应LOCAL_CFLAGS
+        }
+    }
+    sourceSets.main{
+        jni.srcDirs = [] // This prevents the auto generation of Android.mk
+        jniLibs.srcDirs = ['libs']//这个脚本的意思是把app下的libs文件夹，当成原本/src/main下的jniLibs文件夹，这样就可以加载so库了。
+    }
+    externalNativeBuild{
+        ndkBuild{
+            path "src/main/jni/Android.mk"
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+}
